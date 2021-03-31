@@ -20,16 +20,19 @@
         <input type="checkbox" id="randomShape"
                name="randomShape" value="Bike">
         <label for="randomShape">Random Shape</label><br>
+
+        <button onclick = "regenerate()">Regenerate</button>
     </div>
 <canvas>
     
 </canvas>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"> 
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+<script>
 var canvas = document.querySelector('canvas');
 canvas.height = 800; //document.querySelector('html').clientHeight;
 canvas.width  = document.querySelector('body').clientWidth;
 var ctx = canvas.getContext('2d');
-var step = 0.01;
+var moveStep = 0.01;
 
 function multiplyMatrix(a, b) {
    if (!Array.isArray(a) || !Array.isArray(b) || !a.length || !b.length) {
@@ -77,34 +80,6 @@ function randomNum(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
-// $("#randomShape").change(function() {
-//     if (document.getElementById('randomShape').checked) {
-//         var cubePoints = [
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
-            
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
-//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]]
-//         ];
-//     } else {
-//         var cubePoints = [
-//             [[-50, -50, -50]],
-//             [[ 50, -50, -50]],
-//             [[ 50,  50, -50]],
-//             [[-50,  50, -50]],
-            
-//             [[-50, -50,  50]],
-//             [[ 50, -50,  50]],
-//             [[ 50,  50,  50]],
-//             [[-50,  50,  50]]
-//         ];
-//     }
-// });
-
 var cubePoints = [
     [[-50, -50, -50]],
     [[ 50, -50, -50]],
@@ -116,6 +91,62 @@ var cubePoints = [
     [[ 50,  50,  50]],
     [[-50,  50,  50]]
 ];
+function regenerate() {
+    theta = 0;
+    if (document.getElementById('randomShape').checked) {
+        cubePoints = [
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]]
+        ];
+    } else {
+        cubePoints = [
+            [[-50, -50, -50]],
+            [[ 50, -50, -50]],
+            [[ 50,  50, -50]],
+            [[-50,  50, -50]],
+            
+            [[-50, -50,  50]],
+            [[ 50, -50,  50]],
+            [[ 50,  50,  50]],
+            [[-50,  50,  50]]
+        ];
+    };
+};
+
+document.getElementById('randomShape').addEventListener('click', function() {
+    if (document.getElementById('randomShape').checked) {
+        cubePoints = [
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]]
+        ];
+    } else {
+        cubePoints = [
+            [[-50, -50, -50]],
+            [[ 50, -50, -50]],
+            [[ 50,  50, -50]],
+            [[-50,  50, -50]],
+            
+            [[-50, -50,  50]],
+            [[ 50, -50,  50]],
+            [[ 50,  50,  50]],
+            [[-50,  50,  50]]
+        ];
+    }
+});
 
 // var cubePoints = [
 //     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
@@ -214,7 +245,7 @@ function draw() {
     addFace(projected[6], projected[2], projected[3], projected[7], "blue");
     addFace(projected[1], projected[0], projected[4], projected[5], "violet");
 
-    theta += step;
+    theta += moveStep;
     requestAnimationFrame(draw);
 }
 draw();
