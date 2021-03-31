@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        canvas {
+            border: 1.5px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <input type="range" name="distance" id="distSlider"
+               min="0" max="500" value="200" step="1">
+        <label for="distSlider">Distance</label>
+
+        <input type="range" name="colAlpha" id="colAlpha"
+               min="0.0" max="100.0" value="20.0" step="1">
+        <label for="colAlpha">Colour Alpha</label>
+
+        <input type="checkbox" id="randomShape"
+               name="randomShape" value="Bike">
+        <label for="randomShape">Random Shape</label><br>
+    </div>
+<canvas>
+    
+</canvas>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"> 
+var canvas = document.querySelector('canvas');
+canvas.height = 800; //document.querySelector('html').clientHeight;
+canvas.width  = document.querySelector('body').clientWidth;
+var ctx = canvas.getContext('2d');
+var step = 0.01;
+
+function multiplyMatrix(a, b) {
+   if (!Array.isArray(a) || !Array.isArray(b) || !a.length || !b.length) {
+      throw new Error('arguments should be in 2-dimensional array format');
+   }
+   let x = a.length,
+   z = a[0].length,
+   y = b[0].length;
+   if (b.length !== z) {
+      // XxZ & ZxY => XxY
+      throw new Error('number of columns in the first matrix should be the same as the number of rows in the second');
+   }
+   let productRow = Array.apply(null, new Array(y)).map(Number.prototype.valueOf, 0);
+   let product = new Array(x);
+   for (let p = 0; p < x; p++) {
+      product[p] = productRow.slice();
+   }
+   for (let i = 0; i < x; i++) {
+      for (let j = 0; j < y; j++) {
+         for (let k = 0; k < z; k++) {
+            product[i][j] += a[i][k] * b[k][j];
+         }
+      }
+   }
+   return product;
+}
+
+function transposeArray(array, arrayLength) {
+    // https://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript
+    var newArray = [];
+    for(var i = 0; i < array.length; i++){
+        newArray.push([]);
+    };
+
+    for(var i = 0; i < array.length; i++){
+        for(var j = 0; j < arrayLength; j++){
+            newArray[j].push(array[i][j]);
+        };
+    };
+
+    return newArray;
+}
+
+function randomNum(min, max) {
+	return Math.floor(Math.random() * (max - min)) + min;
+}
+
+// $("#randomShape").change(function() {
+//     if (document.getElementById('randomShape').checked) {
+//         var cubePoints = [
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+            
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//             [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]]
+//         ];
+//     } else {
+//         var cubePoints = [
+//             [[-50, -50, -50]],
+//             [[ 50, -50, -50]],
+//             [[ 50,  50, -50]],
+//             [[-50,  50, -50]],
+            
+//             [[-50, -50,  50]],
+//             [[ 50, -50,  50]],
+//             [[ 50,  50,  50]],
+//             [[-50,  50,  50]]
+//         ];
+//     }
+// });
+
+var cubePoints = [
+    [[-50, -50, -50]],
+    [[ 50, -50, -50]],
+    [[ 50,  50, -50]],
+    [[-50,  50, -50]],
+    
+    [[-50, -50,  50]],
+    [[ 50, -50,  50]],
+    [[ 50,  50,  50]],
+    [[-50,  50,  50]]
+];
+
+// var cubePoints = [
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+    
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]],
+//     [[randomNum(-50, 50), randomNum(-50, 50), randomNum(-50, 50)]]
+// ];
+
+let theta = 0;
+
+function draw() {
+    var distance = parseInt(document.getElementById("distSlider").value)/100;
+    var colAlpha = parseInt(document.getElementById("colAlpha").value)/100;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    var offset = [document.querySelector('body').clientWidth/2, 800/2];
+
+    const rotationX = [
+        [Math.cos(theta), -Math.sin(theta), 0],
+        [Math.sin(theta),  Math.cos(theta), 0],
+        [0, 0, 1]
+    ];
+    const rotationY = [
+        [Math.cos(theta), 0, -Math.sin(theta)],
+        [0, 1, 0],
+        [Math.sin(theta), 0,  Math.cos(theta)]
+    ];
+    const rotationZ = [
+        [1, 0, 0],
+        [0, Math.cos(theta), -Math.sin(theta)],
+        [0, Math.sin(theta),  Math.cos(theta)]
+    ];
+    
+    let projected = [];
+
+    for (let i = 0; i < cubePoints.length; i++) { // creating projected matrix
+        const point = cubePoints[i];
+        var rotated = multiplyMatrix(point, rotationY);
+        rotated = multiplyMatrix(rotated, rotationX);
+        rotated = multiplyMatrix(rotated, rotationZ);
+
+        var z = 3 / (distance - rotated[0][2]/100);
+        projectionMatrix = [
+            [z, 0],
+            [0, z],
+            [0, 0]
+        ];
+
+        projected[i] = multiplyMatrix(rotated, projectionMatrix)
+    }
+
+    for (let j = 0; j < projected.length; j++) { // drawing
+        ctx.beginPath();
+        ctx.arc(projected[j][0][0]+offset[0], projected[j][0][1]+offset[1], 0, 0, 2*Math.PI);
+        ctx.stroke();
+        ctx.fillStyle = "#000000";
+        // ctx.font = "20px Ariel";
+        // ctx.fillText(j,projected[j][0][0]+offset[0], projected[j][0][1]+offset[1]);
+    }
+    
+    function addFace(v1, v2, v3, v4, col) { // takes in 2D verticies
+        ctx.beginPath();  
+        ctx.globalAlpha = colAlpha;
+        ctx.moveTo(v1[0][0]+offset[0], v1[0][1]+offset[1]);
+        ctx.lineTo(v2[0][0]+offset[0], v2[0][1]+offset[1]);
+        ctx.lineTo(v3[0][0]+offset[0], v3[0][1]+offset[1]);
+        ctx.lineTo(v4[0][0]+offset[0], v4[0][1]+offset[1]);
+        ctx.fillStyle = col;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+
+    function connect(i, j, points) {
+        const a = points[i];
+        const b = points[j]; // retuns x & y vector like [50, -50]
+        ctx.beginPath();
+        ctx.moveTo(a[0][0]+offset[0], a[0][1]+offset[1]); // adds offset (defined @ line 85) to x and or y vector
+        ctx.lineTo(b[0][0]+offset[0], b[0][1]+offset[1]);
+        ctx.stroke();
+    };
+
+    for (let k = 0; k < 4; k++) { // connecting dots with lines
+        connect(k, (k + 1) % 4, projected);
+        connect(k + 4, ((k + 1) % 4) + 4, projected);
+        connect(k, k + 4, projected);
+    };
+
+    addFace(projected[4], projected[5], projected[6], projected[7], "red");
+    addFace(projected[0], projected[1], projected[2], projected[3], "orange");
+    addFace(projected[3], projected[7], projected[4], projected[0], "yellow");
+    addFace(projected[1], projected[5], projected[6], projected[2], "green");
+    addFace(projected[6], projected[2], projected[3], projected[7], "blue");
+    addFace(projected[1], projected[0], projected[4], projected[5], "violet");
+
+    theta += step;
+    requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
