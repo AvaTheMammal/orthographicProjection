@@ -1,2 +1,2 @@
 # orthographicProjection
-A little fun project of mine just testing out my js and jquery skills :)
+A little fun project of mine, some other people have probably already created the exact same things
